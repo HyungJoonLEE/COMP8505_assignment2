@@ -8,30 +8,20 @@ project(COMP8505_assignment1
 
 set(HEADER_LIST
         "${PROJECT_SOURCE_DIR}/include/common.h"
-        "${PROJECT_SOURCE_DIR}/include/server.h"
-        "${PROJECT_SOURCE_DIR}/include/server_helper.h"
-        "${PROJECT_SOURCE_DIR}/include/client.h"
-        "${PROJECT_SOURCE_DIR}/include/client_helper.h"
-        "${PROJECT_SOURCE_DIR}/include/error.h"
-        "${PROJECT_SOURCE_DIR}/include/conversion.h"
+        "${PROJECT_SOURCE_DIR}/include/stego.h"
+        "${PROJECT_SOURCE_DIR}/include/image.h"
+        "${PROJECT_SOURCE_DIR}/include/utils.h"
         )
 
-set(COMMON_SOURCE_LIST
+set(MODULES_SOURCE_LIST
         "${PROJECT_SOURCE_DIR}/src/common.c"
-        "${PROJECT_SOURCE_DIR}/src/error.c"
-        "${PROJECT_SOURCE_DIR}/src/conversion.c"
+        "${PROJECT_SOURCE_DIR}/src/stego.c"
+        "${PROJECT_SOURCE_DIR}/src/image.c"
+        "${PROJECT_SOURCE_DIR}/src/utils.c"
+        "${PROJECT_SOURCE_DIR}/src/main.c"
         )
 
-set(SERVER_SOURCE_LIST
-        "${PROJECT_SOURCE_DIR}/src/server.c"
-        "${PROJECT_SOURCE_DIR}/src/server_helper.c"
-        )
-
-set(CLIENT_SOURCE_LIST
-        "${PROJECT_SOURCE_DIR}/src/client.c"
-        "${PROJECT_SOURCE_DIR}/src/client_helper.c"
-        )
-
+set(MAIN)
 ### Require out-of-source builds
 # this still creates a CMakeFiles directory and CMakeCache.txt- can we delete them?
 file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/CMakeLists.txt" LOC_PATH)
