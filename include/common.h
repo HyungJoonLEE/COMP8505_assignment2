@@ -20,6 +20,7 @@ struct options_image {
     unsigned int hiding_size;
     char result_name[32];
     unsigned int result_size;
+    char flag;
 };
 
 void print_info_option_image(struct options_image *opts);

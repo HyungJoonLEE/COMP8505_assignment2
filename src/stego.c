@@ -52,6 +52,7 @@ void parse_command_line(int argc, char *argv[], struct options_image *opts) {
                     exit(EXIT_FAILURE);
                 }
                 encode_flag = 1;
+                opts->flag = 'e';
                 break;
             }
             case 'd': {
@@ -64,6 +65,7 @@ void parse_command_line(int argc, char *argv[], struct options_image *opts) {
                     exit(EXIT_FAILURE);
                 }
                 decode_flag = 1;
+                opts->flag = 'd';
                 break;
             }
             default:
@@ -80,5 +82,35 @@ void parse_command_line(int argc, char *argv[], struct options_image *opts) {
         fprintf(stderr, "Error: Cannot process carrier, hiding, and result image at the same time.\n");
         exit(EXIT_FAILURE);
     }
+}
+
+void check_file_exist(struct options_image *opts) {
+    char carrier[5] = {0};
+    char hiding[5] = {0};
+
+    strcpy(carrier, check_file_format(opts->carrier_name));
+    strcpy(hiding, check_file_format(opts->hiding_name));
+    if (opts->flag == 'e') {
+        if (access(opts->carrier_name, F_OK) == 0 && access(opts->hiding_name, F_OK) == 0) {
+            printf("\nChecking %s Exist & Extension: TRUE [ %s ]\n"
+                   "Checking %s Exist & Extension: TRUE [ %s ]\n",
+                   opts->carrier_name, carrier, opts->hiding_name, hiding);
+        } else {
+            fprintf(stderr, "Error: FILES are not exist in the directory\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+
+
+char* check_file_format(char* file_name) {
+    const char *dot = strrchr(file_name, '.');
+    if(!dot || dot == file_name) return "";
+    return dot + 1;
+}
+
+
+void check_file_size(struct options_image *opts) {
+
 }
 

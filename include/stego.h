@@ -7,6 +7,8 @@
 
 void options_init_image(struct options_image *opts);
 void parse_command_line(int argc, char *argv[], struct options_image *opts);
-
+void check_file_exist(struct options_image *opts);
+char* check_file_format(char* file_name);
+void check_file_size(struct options_image *opts);
 
 #endif //COMP8505_ASSIGNMENT2_STEGO_H
