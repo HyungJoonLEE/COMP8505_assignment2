@@ -89,19 +89,28 @@ void get_file_info(struct options_image *opts) {
     char hiding[5] = {0};
     char result[5] = {0};
 
-    strcpy(carrier, check_file_format(opts->carrier_name));
-    strcpy(hiding, check_file_format(opts->hiding_name));
+
     if (opts->flag == 'e') {
         if (access(opts->carrier_name, F_OK) == 0 && access(opts->hiding_name, F_OK) == 0) {
             FILE* carrier_image = fopen(opts->carrier_name, "rb");
             FILE* hiding_image  = fopen(opts->hiding_name, "rb");
 
+            /* for result */
+            opts->carrier_actual = check_file_size(carrier_image);
+
+            /* Check image format */
+            opts->carrier_type = check_file_format(carrier_image);
+            sprintf(carrier, "%04X", opts->carrier_type);
+            opts->hiding_type = check_file_format(hiding_image);
+            sprintf(hiding, "%04X", opts->hiding_type);
+
+
             /* Calculate image size */
-            opts->carrier_size = check_file_size(carrier_image);
-            opts->hiding_size = check_file_size(hiding_image);
+            opts->carrier_size = check_image_size(carrier_image);
+            opts->hiding_size = check_image_size(hiding_image);
 
             /* if carrier size is not enough to put hiding file name */
-            if (opts->carrier_size > opts->hiding_size + 120) {
+//            if (opts->carrier_size > opts->hiding_size * 8 + 120) {
                 /* Calculate number of bits */
                 opts->carrier_pixel = check_pixel_num(carrier_image);
                 opts->hiding_pixel = check_pixel_num(hiding_image);
@@ -117,10 +126,10 @@ void get_file_info(struct options_image *opts) {
                        "Hiding Size   : %d bytes\n"
                        "Hiding Number : %d bits\n" ,
                        opts->hiding_name, hiding, opts->hiding_size, opts->hiding_pixel);
-            } else {
-                fprintf(stderr, "Error: Carrier FILE is not big enough to hide image\n");
-                exit(EXIT_FAILURE);
-            }
+//            } else {
+//                fprintf(stderr, "Error: Carrier FILE is not big enough to hide image\n");
+//                exit(EXIT_FAILURE);
+//            }
             fclose(carrier_image);
             fclose(hiding_image);
         } else {
@@ -132,8 +141,14 @@ void get_file_info(struct options_image *opts) {
         if (access(opts->result_name, F_OK) == 0) {
             FILE* result_image  = fopen(opts->hiding_name, "rb");
 
-            /* Calculate Result Image format, size, bits number */
-            opts->result_size = check_file_size(result_image);
+            /* Check image format */
+            opts->result_type = check_file_format(result_image);
+            sprintf(result, "%04X", opts->result_type);
+
+            /* Calculate image size */
+            opts->result_size = check_image_size(result_image);
+
+            /* Calculate number of bits */
             opts->result_pixel = check_pixel_num(result_image);
             puts("[ Decoding Mode ]");
             printf("Result Image  : %s\n"
@@ -150,10 +165,13 @@ void get_file_info(struct options_image *opts) {
 }
 
 
-char* check_file_format(char* file_name) {
-    const char *dot = strrchr(file_name, '.');
-    if(!dot || dot == file_name) return "";
-    return dot + 1;
+unsigned short check_file_format(FILE *image_file) {
+    uint16_t type;
+    fseek(image_file, 0, SEEK_SET);
+    fread(&type, sizeof(uint16_t), 1, image_file);
+    rewind(image_file);
+
+    return type;
 }
 
 
@@ -179,10 +197,9 @@ unsigned int check_pixel_num(FILE *image_file) {
 }
 
 
-unsigned int check_file_size(FILE *image_file) {
+unsigned int check_image_size(FILE *image_file) {
     unsigned int file_size;
 
-    // Move to 2 byte behind
     fseek(image_file, 34, SEEK_SET);
     fread(&file_size, sizeof(uint32_t), 1, image_file);
     rewind(image_file);
@@ -191,3 +208,12 @@ unsigned int check_file_size(FILE *image_file) {
 }
 
 
+unsigned int check_file_size(FILE *image_file) {
+    unsigned int file_size;
+
+    fseek(image_file, 2, SEEK_SET);
+    fread(&file_size, sizeof(uint32_t), 1, image_file);
+    rewind(image_file);
+
+    return file_size;
+}

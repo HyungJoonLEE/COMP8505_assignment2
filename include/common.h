@@ -16,17 +16,29 @@
 
 
 struct options_image {
+    /* carrier */
     char carrier_name[32];
     unsigned int carrier_size;
     unsigned int carrier_pixel;
+    unsigned int carrier_actual;
+    unsigned short carrier_type;
+
+    /* hiding */
     char hiding_name[32];
     unsigned int hiding_size;
     unsigned int hiding_pixel;
+    unsigned short hiding_type;
+
+    /* result */
     char result_name[32];
     unsigned int result_size;
     unsigned int result_pixel;
+    unsigned short result_type;
+
+    /* flag for encode/decode */
     char flag;
 };
+
 
 typedef struct bitmap {          // Total: 54 bytes
     uint16_t  type;             // Magic identifier: 0x4d42 (0)
@@ -47,6 +59,7 @@ typedef struct bitmap {          // Total: 54 bytes
     uint32_t  important_colors; // Important colors (50)
 } BMPHeader;
 
-void print_info_option_image(struct options_image *opts);
+
+
 
 #endif //COMP8505_ASSIGNMENT2_COMMON_H

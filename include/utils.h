@@ -3,6 +3,7 @@
 
 //TODO: contain the two main functions for hiding and extracting the data.
 #include "common.h"
+#include "image.h"
 
 void hiding_data(struct options_image *opts);
 void extracting_data(struct options_image *opts);
