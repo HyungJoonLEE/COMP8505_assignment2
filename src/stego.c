@@ -84,17 +84,57 @@ void parse_command_line(int argc, char *argv[], struct options_image *opts) {
     }
 }
 
-void check_file_exist(struct options_image *opts) {
+void get_file_info(struct options_image *opts) {
     char carrier[5] = {0};
     char hiding[5] = {0};
+    char result[5] = {0};
 
     strcpy(carrier, check_file_format(opts->carrier_name));
     strcpy(hiding, check_file_format(opts->hiding_name));
     if (opts->flag == 'e') {
         if (access(opts->carrier_name, F_OK) == 0 && access(opts->hiding_name, F_OK) == 0) {
-            printf("\nChecking %s Exist & Extension: TRUE [ %s ]\n"
-                   "Checking %s Exist & Extension: TRUE [ %s ]\n",
-                   opts->carrier_name, carrier, opts->hiding_name, hiding);
+            FILE* carrier_image = fopen(opts->carrier_name, "rb");
+            FILE* hiding_image  = fopen(opts->hiding_name, "rb");
+
+            /* Calculate Carrier Image format, size, bits number */
+            opts->carrier_size = check_file_size(carrier_image);
+            opts->carrier_pixel = check_pixel_num(carrier_image);
+            puts("[ Encoding Mode ]");
+            printf("Carrier Image  : %s\n"
+                          "Carrier Format : %s\n"
+                          "Carrier Size   : %d bytes\n"
+                          "Carrier Number : %d bits\n\n" ,
+                   opts->carrier_name, carrier, opts->carrier_size, opts->carrier_pixel);
+            fclose(carrier_image);
+
+            /* Calculate Hiding Image format, size, bits number */
+            opts->hiding_size = check_file_size(hiding_image);
+            opts->hiding_pixel = check_pixel_num(hiding_image);
+            printf("Hiding Image  : %s\n"
+                   "Hiding Format : %s\n"
+                   "Hiding Size   : %d bytes\n"
+                   "Hiding Number : %d bits\n" ,
+                   opts->hiding_name, hiding, opts->hiding_size, opts->hiding_pixel);
+            fclose(hiding_image);
+        } else {
+            fprintf(stderr, "Error: FILES are not exist in the directory\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+    if (opts->flag == 'd') {
+        if (access(opts->result_name, F_OK) == 0) {
+            FILE* result_image  = fopen(opts->hiding_name, "rb");
+
+            /* Calculate Result Image format, size, bits number */
+            opts->result_size = check_file_size(result_image);
+            opts->result_pixel = check_pixel_num(result_image);
+            puts("[ Decoding Mode ]");
+            printf("Result Image  : %s\n"
+                   "Result Format : %s\n"
+                   "Result Size   : %d bytes\n"
+                   "Result Number : %d bits\n" ,
+                   opts->result_name, result, opts->result_size, opts->result_pixel);
+            fclose(result_image);
         } else {
             fprintf(stderr, "Error: FILES are not exist in the directory\n");
             exit(EXIT_FAILURE);
@@ -110,7 +150,37 @@ char* check_file_format(char* file_name) {
 }
 
 
-void check_file_size(struct options_image *opts) {
+unsigned int check_pixel_num(FILE *image_file) {
+    uint32_t width, height;
+    uint16_t bits_per_pixel;
 
+    // Move to 18th byte behind
+    fseek(image_file, 18, SEEK_SET);
+
+    // Read the width uint32_t (22)
+    fread(&width, sizeof(uint32_t), 1, image_file);
+
+    // Read the height uint32_t (26)
+    fread(&height, sizeof(uint32_t), 1, image_file);
+
+    // Read the bits per pixel
+    fseek(image_file, 2, SEEK_CUR);
+    fread(&bits_per_pixel, sizeof(uint16_t), 1, image_file);
+    rewind(image_file);
+
+    return width * height * bits_per_pixel;
 }
+
+
+unsigned int check_file_size(FILE *image_file) {
+    unsigned int file_size;
+
+    // Move to 2 byte behind
+    fseek(image_file, 34, SEEK_SET);
+    fread(&file_size, sizeof(uint32_t), 1, image_file);
+    rewind(image_file);
+
+    return file_size;
+}
+
 

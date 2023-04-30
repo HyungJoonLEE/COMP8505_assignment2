@@ -7,8 +7,10 @@
 
 void options_init_image(struct options_image *opts);
 void parse_command_line(int argc, char *argv[], struct options_image *opts);
-void check_file_exist(struct options_image *opts);
+void get_file_info(struct options_image *opts);
 char* check_file_format(char* file_name);
-void check_file_size(struct options_image *opts);
+unsigned int check_pixel_num(FILE *image_file);
+unsigned int check_file_size(FILE *image_file);
+
 
 #endif //COMP8505_ASSIGNMENT2_STEGO_H

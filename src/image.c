@@ -1,4 +1,2 @@
-//
-// Created by Hyung Joon Lee on 2023-04-29.
-//
-#include "../include/image.h"
+#include "image.h"
+
