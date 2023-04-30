@@ -8,4 +8,5 @@ int main(int argc, char* argv[]) {
     options_init_image(&opts);
     parse_command_line(argc, argv, &opts);
     get_file_info(&opts);
+
 }

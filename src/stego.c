@@ -96,25 +96,32 @@ void get_file_info(struct options_image *opts) {
             FILE* carrier_image = fopen(opts->carrier_name, "rb");
             FILE* hiding_image  = fopen(opts->hiding_name, "rb");
 
-            /* Calculate Carrier Image format, size, bits number */
+            /* Calculate image size */
             opts->carrier_size = check_file_size(carrier_image);
-            opts->carrier_pixel = check_pixel_num(carrier_image);
-            puts("[ Encoding Mode ]");
-            printf("Carrier Image  : %s\n"
-                          "Carrier Format : %s\n"
-                          "Carrier Size   : %d bytes\n"
-                          "Carrier Number : %d bits\n\n" ,
-                   opts->carrier_name, carrier, opts->carrier_size, opts->carrier_pixel);
-            fclose(carrier_image);
-
-            /* Calculate Hiding Image format, size, bits number */
             opts->hiding_size = check_file_size(hiding_image);
-            opts->hiding_pixel = check_pixel_num(hiding_image);
-            printf("Hiding Image  : %s\n"
-                   "Hiding Format : %s\n"
-                   "Hiding Size   : %d bytes\n"
-                   "Hiding Number : %d bits\n" ,
-                   opts->hiding_name, hiding, opts->hiding_size, opts->hiding_pixel);
+
+            /* if carrier size is not enough to put hiding file name */
+            if (opts->carrier_size > opts->hiding_size + 120) {
+                /* Calculate number of bits */
+                opts->carrier_pixel = check_pixel_num(carrier_image);
+                opts->hiding_pixel = check_pixel_num(hiding_image);
+                puts("[ Encoding Mode ]");
+                printf("Carrier Image  : %s\n"
+                       "Carrier Format : %s\n"
+                       "Carrier Size   : %d bytes\n"
+                       "Carrier Number : %d bits\n\n" ,
+                       opts->carrier_name, carrier, opts->carrier_size, opts->carrier_pixel);
+
+                printf("Hiding Image  : %s\n"
+                       "Hiding Format : %s\n"
+                       "Hiding Size   : %d bytes\n"
+                       "Hiding Number : %d bits\n" ,
+                       opts->hiding_name, hiding, opts->hiding_size, opts->hiding_pixel);
+            } else {
+                fprintf(stderr, "Error: Carrier FILE is not big enough to hide image\n");
+                exit(EXIT_FAILURE);
+            }
+            fclose(carrier_image);
             fclose(hiding_image);
         } else {
             fprintf(stderr, "Error: FILES are not exist in the directory\n");
