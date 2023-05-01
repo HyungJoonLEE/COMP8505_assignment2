@@ -85,10 +85,6 @@ void parse_command_line(int argc, char *argv[], struct options_image *opts) {
 }
 
 void get_file_info(struct options_image *opts) {
-    char carrier[5] = {0};
-    char hiding[5] = {0};
-    char result[5] = {0};
-
 
     if (opts->flag == 'e') {
         if (access(opts->carrier_name, F_OK) == 0 && access(opts->hiding_name, F_OK) == 0) {
@@ -99,10 +95,8 @@ void get_file_info(struct options_image *opts) {
             opts->carrier_actual = check_file_size(carrier_image);
 
             /* Check image format */
-            opts->carrier_type = check_file_format(carrier_image);
-            sprintf(carrier, "%04X", opts->carrier_type);
-            opts->hiding_type = check_file_format(hiding_image);
-            sprintf(hiding, "%04X", opts->hiding_type);
+            check_file_format(carrier_image, opts->carrier_type);
+            check_file_format(hiding_image, opts->hiding_type);
 
 
             /* Calculate image size */
@@ -119,13 +113,13 @@ void get_file_info(struct options_image *opts) {
                        "Carrier Format : %s\n"
                        "Carrier Size   : %d bytes\n"
                        "Carrier Number : %d bits\n\n" ,
-                       opts->carrier_name, carrier, opts->carrier_size, opts->carrier_pixel);
+                       opts->carrier_name, opts->carrier_type, opts->carrier_size, opts->carrier_pixel);
 
                 printf("Hiding Image  : %s\n"
                        "Hiding Format : %s\n"
                        "Hiding Size   : %d bytes\n"
                        "Hiding Number : %d bits\n" ,
-                       opts->hiding_name, hiding, opts->hiding_size, opts->hiding_pixel);
+                       opts->hiding_name, opts->hiding_type, opts->hiding_size, opts->hiding_pixel);
 //            } else {
 //                fprintf(stderr, "Error: Carrier FILE is not big enough to hide image\n");
 //                exit(EXIT_FAILURE);
@@ -142,8 +136,7 @@ void get_file_info(struct options_image *opts) {
             FILE* result_image  = fopen(opts->hiding_name, "rb");
 
             /* Check image format */
-            opts->result_type = check_file_format(result_image);
-            sprintf(result, "%04X", opts->result_type);
+            check_file_format(result_image, opts->result_type);
 
             /* Calculate image size */
             opts->result_size = check_image_size(result_image);
@@ -155,7 +148,7 @@ void get_file_info(struct options_image *opts) {
                    "Result Format : %s\n"
                    "Result Size   : %d bytes\n"
                    "Result Number : %d bits\n" ,
-                   opts->result_name, result, opts->result_size, opts->result_pixel);
+                   opts->result_name, opts->result_type, opts->result_size, opts->result_pixel);
             fclose(result_image);
         } else {
             fprintf(stderr, "Error: FILES are not exist in the directory\n");
@@ -165,15 +158,24 @@ void get_file_info(struct options_image *opts) {
 }
 
 
-unsigned short check_file_format(FILE *image_file) {
+void check_file_format(FILE *image_file, char* file_type) {
     uint16_t type;
+
     fseek(image_file, 0, SEEK_SET);
-    fread(&type, sizeof(uint16_t), 1, image_file);
+    fread(&type, sizeof(short), 1, image_file);
     rewind(image_file);
 
-    return type;
-}
+    /**
+     * Bitmap files have little-endian byte order,
+     * which means the least significant byte comes first.
+     * When reading a 16-bit value,
+     * system seems to be interpreting it as big-endian,
+     * which reverses the byte order.
+     * **/
+    type = (uint16_t) ((type >> 8) | (type << 8));
 
+    if (type == 0x424D) strcpy(file_type, "BM");
+}
 
 unsigned int check_pixel_num(FILE *image_file) {
     uint32_t width, height;
