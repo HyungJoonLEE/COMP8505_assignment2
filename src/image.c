@@ -1,18 +1,15 @@
 #include "image.h"
 
-uint8_t reverse_byte(uint8_t byte);
 
 void create_result_image_file(struct options_image *opts) {
     uint8_t bit = 0;
+    uint8_t byte;
     int encrypt_length = 0;
     int encrypt_file_name = 0;
-    int encrypt_hiding_byte = 0;
+    int encrypt_byte = 0;
     uint32_t counter = 0;
     uint32_t hiding_size = 0;
     int carrier_byte = 0;
-    int hiding_byte = 0;
-    uint8_t byte;
-    uint8_t reversed_byte = 0;
 
 
     char result_name[] = "result.bmp";
@@ -99,14 +96,14 @@ void create_result_image_file(struct options_image *opts) {
     /* Hiding img file */
     while (hiding_size != opts->hiding_actual) {
         fread(&byte, sizeof(uint8_t), 1, hiding);
-        encrypt_hiding_byte = encrypt_decrypt(hiding_byte);
+        encrypt_byte = encrypt_decrypt(byte);
         for (int i = 0; i < 8; i++) {
             if (counter == opts->carrier_pixel_data_size) {
                 fseek(carrier, opts->carrier_padding, SEEK_CUR);
                 fseek(result, opts->carrier_padding, SEEK_CUR);
                 counter = 0;
             }
-            bit = bit_process((uint8_t) encrypt_hiding_byte, i);
+            bit = bit_process((uint8_t) encrypt_byte, i);
 //            printf("[carrier] Read : %ld\n", ftell(carrier));
             fread(&byte, sizeof(uint8_t), 1, carrier);
             if (bit == 1 && (get_LSB(byte) == 0)) byte |= 1;
@@ -162,7 +159,7 @@ void interpret_result_image(struct options_image *opts) {
         counter++;
     }
     krypto_length = (uint8_t) encrypt_decrypt(byte);
-    printf("%d\n", krypto_length);
+//    printf("%d\n", krypto_length);
     memset(bits, 0, 8);
 
 
@@ -186,7 +183,7 @@ void interpret_result_image(struct options_image *opts) {
     printf("%s\n", krypto_file_name);
 
 
-    FILE *kryptos = fopen("kkk.bmp", "wb");
+    FILE *kryptos = fopen(krypto_file_name, "wb");
     if (result == NULL) {
         fclose(result);
         fprintf(stderr, "[create_result_image_file] Could not create %s.\n", krypto_file_name);
@@ -198,23 +195,24 @@ void interpret_result_image(struct options_image *opts) {
     /* decrypt bmp file header */
     for (int i = 0; i < 54; i++) {
         for (int j = 7; j >= 0; j--) {
+            if (counter == opts->result_pixel_data_size) {
+                fseek(result, opts->result_padding, SEEK_CUR);
+                counter = 0;
+            }
             fread(&bits[j], sizeof(uint8_t), 1, result);
             bits[j] = get_LSB((uint8_t) bits[j]);
             byte = (uint8_t) ((byte << 1) | bits[j]);
             counter++;
+            decrypt_byte = (uint8_t)encrypt_decrypt(byte);
         }
-
-        for (int j = 0; j < 8; j++) {
-            printf("%u", bits[j]);
-        }
-        printf("\n");
-//        fwrite(&decrypt_byte, sizeof(uint8_t), 1, kryptos);
+        fwrite(&decrypt_byte, sizeof(uint8_t), 1, kryptos);
     }
 
 
-    krypto_size = check_file_size(kryptos);
-    printf("%d\n", krypto_size);
 
+    krypto_size = check_file_size(kryptos);
+    printf("size = %d\n", krypto_size);
+    fseek(kryptos, 54, SEEK_SET);
     while(krypto_size_checker < krypto_size) {
         for (int j = 7; j >= 0; j--) {
             if (counter == opts->result_pixel_data_size) {
@@ -294,12 +292,6 @@ void validate_file_size(struct options_image *opts, char type) {
     }
 }
 
-
-uint8_t reverse_byte(uint8_t byte) {
-    uint8_t high_nibble = (byte & 0xF0) >> 4; // Extract the high nibble and shift it to the right
-    uint8_t low_nibble = (byte & 0x0F);       // Extract the low nibble
-    return (low_nibble << 4) | high_nibble;  // Shift the low nibble to the left and combine with the high nibble
-}
 
 
 
