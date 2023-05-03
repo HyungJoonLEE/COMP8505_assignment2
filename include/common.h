@@ -22,12 +22,27 @@ struct options_image {
     unsigned int carrier_size;
     unsigned int carrier_pixel;
     unsigned int carrier_actual;
+    uint32_t carrier_width;
+    uint32_t carrier_height;
+    uint16_t carrier_bpp;
+    uint32_t carrier_row_size;
+    uint32_t carrier_pixel_data_size;
+    uint16_t carrier_padding;
+    uint32_t carrier_offset;
 
     /* hiding */
     char hiding_name[32];
     char hiding_type[5];
     unsigned int hiding_size;
     unsigned int hiding_pixel;
+    unsigned int hiding_actual;
+    uint32_t hiding_width;
+    uint32_t hiding_height;
+    uint16_t hiding_bpp;
+    uint32_t hiding_row_size;
+    uint32_t hiding_pixel_data_size;
+    uint16_t hiding_padding;
+
 
     /* result */
     char result_name[32];
@@ -39,7 +54,7 @@ struct options_image {
     char flag;
 };
 
-
+// Total: 54 bytes
 typedef struct bitmap {          // Total: 54 bytes
     uint16_t  type;             // Magic identifier: 0x4d42 (0)
     uint32_t  size;             // File size in bytes (2)
@@ -58,12 +73,6 @@ typedef struct bitmap {          // Total: 54 bytes
     uint32_t  num_colors;       // Number of colors (46)
     uint32_t  important_colors; // Important colors (50)
 } BMPHeader;
-
-typedef struct rgb{
-    uint8_t blue;
-    uint8_t green;
-    uint8_t red;
-}RGB;
 
 
 #endif //COMP8505_ASSIGNMENT2_COMMON_H

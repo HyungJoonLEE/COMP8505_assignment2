@@ -6,6 +6,15 @@
 #include "stego.h"
 
 
-void create_temp_result_image_file(struct options_image *opts);
+void create_result_image_file(struct options_image *opts);
+void file_validator(const FILE *bmp_file, char* file_name);
+int encrypt_decrypt(int input);
+uint8_t bit_process(uint8_t value, int index);
+int get_LSB(uint8_t value);
+uint32_t get_width(FILE* img_file);
+uint32_t get_height(FILE* img_file);
+void validate_file_size(struct options_image *opts);
+
+
 
 #endif //COMP8505_ASSIGNMENT2_IMAGE_H

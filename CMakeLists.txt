@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 # Project name and a few useful settings. Other commands can pick up the results
-project(COMP8505_assignment1
+project(COMP8505_assignment2
         VERSION 0.1
         DESCRIPTION ""
         LANGUAGES C)

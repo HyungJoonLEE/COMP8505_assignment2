@@ -92,34 +92,49 @@ void get_file_info(struct options_image *opts) {
             FILE* hiding_image  = fopen(opts->hiding_name, "rb");
 
             /* for result */
+            opts->carrier_offset = get_offset(carrier_image);
+            opts->carrier_width = get_width(carrier_image);
+            opts->carrier_height = get_height(carrier_image);
+            opts->carrier_bpp = get_bbp(carrier_image);
             opts->carrier_actual = check_file_size(carrier_image);
+            opts->carrier_row_size = (((opts->carrier_width * opts->carrier_bpp) + 31) / 32) * 4;
+            opts->carrier_pixel_data_size = (opts->carrier_width * opts->carrier_bpp) / 8;
+            opts->carrier_padding = (uint16_t) (opts->carrier_row_size - (opts->carrier_width * 3));
+
+            opts->hiding_width = get_width(hiding_image);
+            opts->hiding_height = get_height(hiding_image);
+            opts->hiding_bpp = get_bbp(hiding_image);
+            opts->hiding_actual = check_file_size(hiding_image);
+            opts->hiding_row_size = (((opts->hiding_width * opts->hiding_bpp) + 31) / 32) * 4;
+            opts->hiding_pixel_data_size = (opts->hiding_width * opts->hiding_bpp) / 8;
+            opts->hiding_padding = (uint16_t) (opts->hiding_row_size - (opts->hiding_width * 3));
 
             /* Check image format */
             check_file_format(carrier_image, opts->carrier_type);
             check_file_format(hiding_image, opts->hiding_type);
-
 
             /* Calculate image size */
             opts->carrier_size = check_image_size(carrier_image);
             opts->hiding_size = check_image_size(hiding_image);
 
             /* if carrier size is not enough to put hiding file name */
-//            if (opts->carrier_size > opts->hiding_size * 8 + 120) {
+            /* len of file name + file name + hiding header */
+//            if (opts->carrier_size > (opts->hiding_actual_size * 8 + strlen(opts->hiding_name) * 8)) {
                 /* Calculate number of bits */
                 opts->carrier_pixel = check_pixel_num(carrier_image);
                 opts->hiding_pixel = check_pixel_num(hiding_image);
                 puts("[ Encoding Mode ]");
                 printf("Carrier Image  : %s\n"
                        "Carrier Format : %s\n"
-                       "Carrier Size   : %d bytes\n"
+                       "Carrier Size   : %d (%d) bytes\n"
                        "Carrier Number : %d bits\n\n" ,
-                       opts->carrier_name, opts->carrier_type, opts->carrier_size, opts->carrier_pixel);
+                       opts->carrier_name, opts->carrier_type, opts->carrier_actual, opts->carrier_size, opts->carrier_pixel);
 
                 printf("Hiding Image  : %s\n"
                        "Hiding Format : %s\n"
-                       "Hiding Size   : %d bytes\n"
+                       "Hiding Size   : %d (%d) bytes\n"
                        "Hiding Number : %d bits\n" ,
-                       opts->hiding_name, opts->hiding_type, opts->hiding_size, opts->hiding_pixel);
+                       opts->hiding_name, opts->hiding_type, opts->hiding_actual, opts->hiding_size, opts->hiding_pixel);
 //            } else {
 //                fprintf(stderr, "Error: Carrier FILE is not big enough to hide image\n");
 //                exit(EXIT_FAILURE);
@@ -177,6 +192,7 @@ void check_file_format(FILE *image_file, char* file_type) {
     if (type == 0x424D) strcpy(file_type, "BM");
 }
 
+
 unsigned int check_pixel_num(FILE *image_file) {
     uint32_t width, height;
     uint16_t bits_per_pixel;
@@ -218,4 +234,51 @@ unsigned int check_file_size(FILE *image_file) {
     rewind(image_file);
 
     return file_size;
+}
+
+
+uint32_t get_width(FILE* image_file) {
+    unsigned int width;
+
+    fseek(image_file, 18, SEEK_SET);
+    fread(&width, sizeof(uint32_t), 1, image_file);
+    rewind(image_file);
+
+    return width;
+}
+
+
+uint32_t get_height(FILE* image_file) {
+    uint32_t height;
+
+    fseek(image_file, 22, SEEK_SET);
+    fread(&height, sizeof(uint32_t), 1, image_file);
+
+    rewind(image_file);
+
+    return height;
+}
+
+
+uint16_t get_bbp(FILE* image_file) {
+    uint16_t bbp;
+
+    fseek(image_file, 28, SEEK_SET);
+    fread(&bbp, sizeof(uint16_t), 1, image_file);
+
+    rewind(image_file);
+
+    return bbp;
+}
+
+
+uint32_t get_offset(FILE* image_file) {
+    uint32_t offset;
+
+    fseek(image_file, 10, SEEK_SET);
+    fread(&offset, sizeof(uint32_t), 1, image_file);
+
+    rewind(image_file);
+
+    return offset;
 }
