@@ -71,8 +71,8 @@ void parse_command_line(int argc, char *argv[], struct options_image *opts) {
             default:
                 printf("Usage: %s "
                        "[-c | --carrier FILENAME] "
-                       "[-s | --hiding FILENAME] "
-                       "[-s | --result FILENAME] "
+                       "[-h | --hiding FILENAME] "
+                       "[-r | --result FILENAME] "
                        "[-e | --encode]"
                        "[-d | --decode]\n", argv[0]);
                 exit(EXIT_FAILURE);
@@ -91,8 +91,8 @@ void get_file_info(struct options_image *opts) {
             FILE* carrier_image = fopen(opts->carrier_name, "rb");
             FILE* hiding_image  = fopen(opts->hiding_name, "rb");
 
-            /* for result */
             opts->carrier_offset = get_offset(carrier_image);
+
             opts->carrier_width = get_width(carrier_image);
             opts->carrier_height = get_height(carrier_image);
             opts->carrier_bpp = get_bbp(carrier_image);
@@ -119,7 +119,7 @@ void get_file_info(struct options_image *opts) {
 
             /* if carrier size is not enough to put hiding file name */
             /* len of file name + file name + hiding header */
-//            if (opts->carrier_size > (opts->hiding_actual_size * 8 + strlen(opts->hiding_name) * 8)) {
+            if (opts->carrier_size > (opts->hiding_actual * 8 + strlen(opts->hiding_name) * 8) + 8) {
                 /* Calculate number of bits */
                 opts->carrier_pixel = check_pixel_num(carrier_image);
                 opts->hiding_pixel = check_pixel_num(hiding_image);
@@ -135,10 +135,10 @@ void get_file_info(struct options_image *opts) {
                        "Hiding Size   : %d (%d) bytes\n"
                        "Hiding Number : %d bits\n" ,
                        opts->hiding_name, opts->hiding_type, opts->hiding_actual, opts->hiding_size, opts->hiding_pixel);
-//            } else {
-//                fprintf(stderr, "Error: Carrier FILE is not big enough to hide image\n");
-//                exit(EXIT_FAILURE);
-//            }
+            } else {
+                fprintf(stderr, "Error: Carrier FILE is not big enough to hide image\n");
+                exit(EXIT_FAILURE);
+            }
             fclose(carrier_image);
             fclose(hiding_image);
         } else {
@@ -148,22 +148,31 @@ void get_file_info(struct options_image *opts) {
     }
     if (opts->flag == 'd') {
         if (access(opts->result_name, F_OK) == 0) {
-            FILE* result_image  = fopen(opts->hiding_name, "rb");
+            FILE* result_image  = fopen(opts->result_name, "rb");
 
             /* Check image format */
             check_file_format(result_image, opts->result_type);
 
             /* Calculate image size */
+            opts->result_actual = check_file_size(result_image);
             opts->result_size = check_image_size(result_image);
+            opts->result_offset = get_offset(result_image);
+            opts->result_width = get_width(result_image);
+            opts->result_height = get_height(result_image);
+            opts->result_bpp = get_bbp(result_image);
+            opts->result_actual = check_file_size(result_image);
+            opts->result_row_size = (((opts->result_width * opts->result_bpp) + 31) / 32) * 4;
+            opts->result_pixel_data_size = (opts->result_width * opts->result_bpp) / 8;
+            opts->result_padding = (uint16_t) (opts->result_row_size - (opts->result_width * 3));
 
             /* Calculate number of bits */
             opts->result_pixel = check_pixel_num(result_image);
             puts("[ Decoding Mode ]");
             printf("Result Image  : %s\n"
                    "Result Format : %s\n"
-                   "Result Size   : %d bytes\n"
+                   "Result Size   : %d (%d) bytes\n"
                    "Result Number : %d bits\n" ,
-                   opts->result_name, opts->result_type, opts->result_size, opts->result_pixel);
+                   opts->result_name, opts->result_type, opts->result_size, opts->result_actual, opts->result_pixel);
             fclose(result_image);
         } else {
             fprintf(stderr, "Error: FILES are not exist in the directory\n");

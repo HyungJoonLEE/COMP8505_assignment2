@@ -49,6 +49,14 @@ struct options_image {
     char result_type[5];
     unsigned int result_size;
     unsigned int result_pixel;
+    unsigned int result_actual;
+    uint32_t result_width;
+    uint32_t result_height;
+    uint16_t result_bpp;
+    uint32_t result_row_size;
+    uint32_t result_pixel_data_size;
+    uint16_t result_padding;
+    uint32_t result_offset;
 
     /* flag for encode/decode */
     char flag;
