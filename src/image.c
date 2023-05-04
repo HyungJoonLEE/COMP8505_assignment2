@@ -130,6 +130,7 @@ void interpret_result_image(struct options_image *opts) {
     int bits[8] = {0};
     uint8_t krypto_length = 0;
     char* krypto_file_name;
+    uint8_t size[4];
     uint8_t decrypt_byte;
     uint32_t counter = 0;
     uint32_t krypto_size = 0;
@@ -205,15 +206,22 @@ void interpret_result_image(struct options_image *opts) {
             counter++;
             decrypt_byte = (uint8_t)encrypt_decrypt(byte);
         }
+        if (i == 2) size[3] = decrypt_byte;
+        if (i == 3) size[2] = decrypt_byte;
+        if (i == 4) size[1] = decrypt_byte;
+        if (i == 5) size[0] = decrypt_byte;
+
+        krypto_size = ((uint32_t)size[0] << 24) |
+                     ((uint32_t)size[1] << 16) |
+                     ((uint32_t)size[2] << 8)  |
+                     ((uint32_t)size[3]);
         fwrite(&decrypt_byte, sizeof(uint8_t), 1, kryptos);
     }
 
 
-
-    krypto_size = check_file_size(kryptos);
     printf("size = %d\n", krypto_size);
     fseek(kryptos, 54, SEEK_SET);
-    while(krypto_size_checker < krypto_size) {
+    while(krypto_size_checker < krypto_size - 54) {
         for (int j = 7; j >= 0; j--) {
             if (counter == opts->result_pixel_data_size) {
                 fseek(result, opts->result_padding, SEEK_CUR);
@@ -223,8 +231,8 @@ void interpret_result_image(struct options_image *opts) {
             bits[j] = get_LSB((uint8_t) bits[j]);
             byte = (uint8_t) ((byte << 1) | bits[j]);
             counter++;
-            krypto_size_checker++;
         }
+        krypto_size_checker++;
         byte = (uint8_t) encrypt_decrypt(byte);
         fwrite(&byte, sizeof(uint8_t), 1, kryptos);
         memset(bits, 0, 8);
