@@ -19,9 +19,9 @@ struct options_image {
     /* carrier */
     char carrier_name[32];
     char carrier_type[5];
-    unsigned int carrier_size;
-    unsigned int carrier_pixel;
-    unsigned int carrier_actual;
+    unsigned int carrier_img_size;
+    unsigned int carrier_pixel_num;
+    unsigned int carrier_actual_size;
     uint32_t carrier_width;
     uint32_t carrier_height;
     uint16_t carrier_bpp;
@@ -33,9 +33,9 @@ struct options_image {
     /* hiding */
     char hiding_name[32];
     char hiding_type[5];
-    unsigned int hiding_size;
-    unsigned int hiding_pixel;
-    unsigned int hiding_actual;
+    unsigned int hiding_img_size;
+    unsigned int hiding_pixel_num;
+    unsigned int hiding_actual_size;
     uint32_t hiding_width;
     uint32_t hiding_height;
     uint16_t hiding_bpp;
@@ -47,9 +47,9 @@ struct options_image {
     /* result */
     char result_name[32];
     char result_type[5];
-    unsigned int result_size;
-    unsigned int result_pixel;
-    unsigned int result_actual;
+    unsigned int result_img_size;
+    unsigned int result_pixel_num;
+    unsigned int result_actual_size;
     uint32_t result_width;
     uint32_t result_height;
     uint16_t result_bpp;
