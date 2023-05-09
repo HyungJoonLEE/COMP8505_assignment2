@@ -16,7 +16,7 @@ void parse_command_line(int argc, char *argv[], struct options_image *opts) {
 
     static struct option long_options[] = {
             {"carrier", required_argument, 0, 'c'},
-            {"hiding", required_argument, 0, 's'},
+            {"hiding", required_argument, 0, 'h'},
             {"result", required_argument, 0, 'r'},
             {"encode", no_argument, 0, 'e'},
             {"decode", no_argument, 0, 'd'},
