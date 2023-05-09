@@ -170,17 +170,14 @@ void check_file_format(FILE *image_file, struct options_image *opts, char flag) 
     if (opts->flag == 'e') {
         if (flag == 'c') {
             if (type == 0x4D42) strcpy(opts->carrier_type, "BM");
-            if (type == 0xD8FF) strcpy(opts->carrier_type, "JPEG | JPG");
         }
         if (flag == 'h') {
             if (type == 0x4D42) strcpy(opts->hiding_type, "BM");
-            if (type == 0xD8FF) strcpy(opts->hiding_type, "JPEG | JPG");
         }
     }
     if (opts->flag == 'd') {
         if (flag == 'r') {
             if (type == 0x4D42) strcpy(opts->result_type, "BM");
-            if (type == 0xD8FF) strcpy(opts->result_type, "JPEG | JPG");
         }
     }
 
