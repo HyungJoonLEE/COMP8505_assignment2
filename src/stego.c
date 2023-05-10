@@ -169,17 +169,18 @@ void check_file_format(FILE *image_file, struct options_image *opts, char flag) 
 
     if (opts->flag == 'e') {
         if (flag == 'c') {
-            if (type == 0x4D42) strcpy(opts->carrier_type, "BM");
+            if (type == 0x4D42) strcpy(opts->carrier_type, "BMP [0x4D42]");
         }
         if (flag == 'h') {
-            if (type == 0x4D42) strcpy(opts->hiding_type, "BM");
-            if (type == 0xD8FF) strcpy(opts->hiding_type, "JPG");
-            if (type == 0x5089) strcpy(opts->hiding_type, "PNG");
+            if (type == 0x4D42) strcpy(opts->hiding_type, "BMP [0x4D42]");
+            if (type == 0xD8FF) strcpy(opts->hiding_type, "JPG [0xD8FF]");
+            if (type == 0x5089) strcpy(opts->hiding_type, "PNG [0x5089]");
+            if (type == 0x5025) strcpy(opts->hiding_type, "PDF [0x5025]");
         }
     }
     if (opts->flag == 'd') {
         if (flag == 'r') {
-            if (type == 0x4D42) strcpy(opts->result_type, "BM");
+            if (type == 0x4D42) strcpy(opts->result_type, "BMP [0x4D42]");
         }
     }
 
