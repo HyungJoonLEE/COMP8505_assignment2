@@ -1,7 +1,7 @@
 #include "image.h"
 
 
-void create_result_image_file(struct options_image *opts) {
+void create_result_image(struct options_image *opts) {
     uint8_t bit = 0;
     uint8_t byte;
     int temp;

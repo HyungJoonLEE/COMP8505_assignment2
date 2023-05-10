@@ -6,7 +6,7 @@
 #include "stego.h"
 
 
-void create_result_image_file(struct options_image *opts);
+void create_result_image(struct options_image *opts);
 void interpret_result_image(struct options_image *opts);
 int encrypt_decrypt(int input);
 uint8_t bit_process(uint8_t value, int index);
