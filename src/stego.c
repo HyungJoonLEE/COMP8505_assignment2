@@ -117,7 +117,7 @@ void get_file_info(struct options_image *opts) {
                        "* Hiding Format  : %s\n"
                        "* Hiding Size    : %d bytes\n"
                        "* Hiding width   : %d pixel\n"
-                       "* Hiding height  : %d pixel\n"
+                       "* Hiding height  : %d pixel\n\n"
                        "=================================\n",
                        opts->hiding_name,
                        opts->hiding_type,
@@ -140,12 +140,12 @@ void get_file_info(struct options_image *opts) {
             FILE* result  = fopen(opts->result_name, "rb");
             process_img_info(result, opts, 'r');
 
-            puts("\n======= [ Decoding Mode ] =======");
+            puts("\n======= [ Decoding Mode ] =======\n");
             printf("Result Image   : %s\n"
                    "* Result Format  : %s\n"
                    "* Result Size    : %d bytes\n"
                    "* Result width   : %d pixel\n"
-                   "* Result height  : %d pixel\n"
+                   "* Result height  : %d pixel\n\n"
                    "=================================\n",
                    opts->result_name,
                    opts->result_type,
@@ -174,7 +174,7 @@ void check_file_format(FILE *image_file, struct options_image *opts, char flag) 
         if (flag == 'h') {
             if (type == 0x4D42) strcpy(opts->hiding_type, "BM");
             if (type == 0xD8FF) strcpy(opts->hiding_type, "JPG");
-            if (type == 0x8950) strcpy(opts->hiding_type, "PNG");
+            if (type == 0x5089) strcpy(opts->hiding_type, "PNG");
         }
     }
     if (opts->flag == 'd') {
