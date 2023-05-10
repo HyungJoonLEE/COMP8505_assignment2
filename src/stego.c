@@ -102,28 +102,18 @@ void get_file_info(struct options_image *opts) {
                 puts("\n======= [ Encoding Mode ] =======\n");
                 printf("* Carrier Image : %s\n"
                        "* Carrier Format  : %s\n"
-                       "* Carrier Size    : %d bytes\n"
-                       "* Carrier width   : %d pixel\n"
-                       "* Carrier height  : %d pixel\n",
+                       "* Carrier Size    : %d bytes\n",
                        opts->carrier_name,
                        opts->carrier_type,
-                       opts->carrier_actual_size,
-                       opts->carrier_width,
-                       opts->carrier_height);
-
-
+                       opts->carrier_actual_size);
 
                 printf("\n\n* Hiding Image : %s\n"
                        "* Hiding Format  : %s\n"
-                       "* Hiding Size    : %d bytes\n"
-                       "* Hiding width   : %d pixel\n"
-                       "* Hiding height  : %d pixel\n\n"
+                       "* Hiding Size    : %d bytes\n\n"
                        "=================================\n",
                        opts->hiding_name,
                        opts->hiding_type,
-                       opts->hiding_actual_size,
-                       opts->hiding_width,
-                       opts->hiding_height);
+                       opts->hiding_actual_size);
             } else {
                 fprintf(stderr, "Error: Carrier FILE is not big enough to hide image\n");
                 exit(EXIT_FAILURE);
@@ -143,15 +133,11 @@ void get_file_info(struct options_image *opts) {
             puts("\n======= [ Decoding Mode ] =======\n");
             printf("Result Image   : %s\n"
                    "* Result Format  : %s\n"
-                   "* Result Size    : %d bytes\n"
-                   "* Result width   : %d pixel\n"
-                   "* Result height  : %d pixel\n\n"
+                   "* Result Size    : %d bytes\n\n"
                    "=================================\n",
                    opts->result_name,
                    opts->result_type,
-                   opts->result_actual_size,
-                   opts->result_width,
-                   opts->result_height);
+                   opts->result_actual_size);
             fclose(result);
         } else {
             fprintf(stderr, "Error: FILES are not exist in the directory\n");
@@ -204,7 +190,7 @@ void check_image_size(FILE* image_file, struct options_image *opts, char flag) {
 void check_file_size(FILE* image_file, struct options_image *opts, char flag) {
     unsigned int file_size;
     /* BITMAP */
-    if (strcmp(opts->hiding_type, "BM") == 0) {
+    if (strstr(opts->hiding_type, "BMP") != NULL) {
         fseek(image_file, 2, SEEK_SET);
         fread(&file_size, sizeof(uint32_t), 1, image_file);
     }
@@ -234,7 +220,7 @@ void check_width(FILE* image_file, struct options_image *opts, char flag) {
 
     if (flag == 'c') opts->carrier_width = width;
     if (flag == 'h') {
-        if (strcmp(opts->hiding_type, "BM") != 0) opts->hiding_width = 0;
+        if (strstr(opts->hiding_type, "BMP") == NULL) opts->hiding_width = 0;
         else opts->hiding_width = width;
     }
     if (flag == 'r') opts->result_width = width;
@@ -251,7 +237,7 @@ void check_height(FILE* image_file, struct options_image *opts, char flag) {
 
     if (flag == 'c') opts->carrier_height = height;
     if (flag == 'h') {
-        if (strcmp(opts->hiding_type, "BM") != 0) opts->hiding_height = 0;
+        if (strstr(opts->hiding_type, "BMP") == NULL) opts->hiding_height = 0;
         else opts->hiding_height = height;
     }
     if (flag == 'r') opts->result_height = height;

@@ -138,7 +138,7 @@ void create_result_image_file(struct options_image *opts) {
         hiding_size++;
     }
 
-    printf("Successfully to hide [ %s ] in [ %s ]\n", opts->hiding_name, opts->carrier_name);
+    printf("Successfully to hide [ %s ] in [ %s ]\n\n\n", opts->hiding_name, opts->carrier_name);
 
     rewind(carrier);
     rewind(hiding);
