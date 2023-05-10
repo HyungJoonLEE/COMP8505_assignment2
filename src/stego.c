@@ -96,18 +96,18 @@ void get_file_info(struct options_image *opts) {
             process_img_info(hiding, opts, 'h');
 
             /* if carrier size is not enough to put hiding file name */
-            /* len of file name + file name + hiding header */
-            if (opts->carrier_img_size > (opts->hiding_actual_size * 8 + strlen(opts->hiding_name) * 8) + 8) {
+            /* len of file name + file name + actual size + hiding header */
+            if (opts->carrier_img_size > (opts->hiding_actual_size * 8 + strlen(opts->hiding_name) * 8) + 8 + 32) {
                 /* Calculate number of bits */
                 puts("\n======= [ Encoding Mode ] =======\n");
                 printf("* Carrier Image : %s\n"
                        "* Carrier Format  : %s\n"
-                       "* Carrier Size    : %d (%d) bytes\n"
-                       "* Carrier width   : %d\n"
-                       "* Carrier height  : %d\n",
+                       "* Carrier Size    : %d bytes\n"
+                       "* Carrier width   : %d pixel\n"
+                       "* Carrier height  : %d pixel\n",
                        opts->carrier_name,
                        opts->carrier_type,
-                       opts->carrier_actual_size, opts->carrier_img_size,
+                       opts->carrier_actual_size,
                        opts->carrier_width,
                        opts->carrier_height);
 
@@ -115,13 +115,13 @@ void get_file_info(struct options_image *opts) {
 
                 printf("\n\n* Hiding Image : %s\n"
                        "* Hiding Format  : %s\n"
-                       "* Hiding Size    : %d (%d) bytes\n"
-                       "* Hiding width   : %d\n"
-                       "* Hiding height  : %d\n"
+                       "* Hiding Size    : %d bytes\n"
+                       "* Hiding width   : %d pixel\n"
+                       "* Hiding height  : %d pixel\n"
                        "=================================\n",
                        opts->hiding_name,
                        opts->hiding_type,
-                       opts->hiding_actual_size, opts->hiding_img_size,
+                       opts->hiding_actual_size,
                        opts->hiding_width,
                        opts->hiding_height);
             } else {
@@ -143,13 +143,13 @@ void get_file_info(struct options_image *opts) {
             puts("\n======= [ Decoding Mode ] =======");
             printf("Result Image   : %s\n"
                    "* Result Format  : %s\n"
-                   "* Result Size    : %d (%d) bytes\n"
-                   "* Result width   : %d\n"
-                   "* Result height  : %d\n"
+                   "* Result Size    : %d bytes\n"
+                   "* Result width   : %d pixel\n"
+                   "* Result height  : %d pixel\n"
                    "=================================\n",
                    opts->result_name,
                    opts->result_type,
-                   opts->result_actual_size, opts->result_img_size,
+                   opts->result_actual_size,
                    opts->result_width,
                    opts->result_height);
             fclose(result);
@@ -173,6 +173,8 @@ void check_file_format(FILE *image_file, struct options_image *opts, char flag) 
         }
         if (flag == 'h') {
             if (type == 0x4D42) strcpy(opts->hiding_type, "BM");
+            if (type == 0xD8FF) strcpy(opts->hiding_type, "JPG");
+            if (type == 0x8950) strcpy(opts->hiding_type, "PNG");
         }
     }
     if (opts->flag == 'd') {
@@ -200,9 +202,20 @@ void check_image_size(FILE* image_file, struct options_image *opts, char flag) {
 
 void check_file_size(FILE* image_file, struct options_image *opts, char flag) {
     unsigned int file_size;
+    /* BITMAP */
+    if (strcmp(opts->hiding_type, "BM") == 0) {
+        fseek(image_file, 2, SEEK_SET);
+        fread(&file_size, sizeof(uint32_t), 1, image_file);
+    }
 
-    fseek(image_file, 2, SEEK_SET);
-    fread(&file_size, sizeof(uint32_t), 1, image_file);
+
+    /* OTHERS */
+    else {
+        fseek(image_file, 0, SEEK_SET);
+        fseek(image_file, 0L, SEEK_END);
+        file_size = (unsigned int) ftell(image_file);
+    }
+
     rewind(image_file);
 
     if (flag == 'c') opts->carrier_actual_size = file_size;
@@ -219,7 +232,10 @@ void check_width(FILE* image_file, struct options_image *opts, char flag) {
     rewind(image_file);
 
     if (flag == 'c') opts->carrier_width = width;
-    if (flag == 'h') opts->hiding_width = width;
+    if (flag == 'h') {
+        if (strcmp(opts->hiding_type, "BM") != 0) opts->hiding_width = 0;
+        else opts->hiding_width = width;
+    }
     if (flag == 'r') opts->result_width = width;
 }
 
@@ -233,7 +249,10 @@ void check_height(FILE* image_file, struct options_image *opts, char flag) {
     rewind(image_file);
 
     if (flag == 'c') opts->carrier_height = height;
-    if (flag == 'h') opts->hiding_height = height;
+    if (flag == 'h') {
+        if (strcmp(opts->hiding_type, "BM") != 0) opts->hiding_height = 0;
+        else opts->hiding_height = height;
+    }
     if (flag == 'r') opts->result_height = height;
 }
 
