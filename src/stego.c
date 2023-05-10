@@ -34,7 +34,6 @@ void parse_command_line(int argc, char *argv[], struct options_image *opts) {
             case 'h': {
                 strcpy(opts->hiding_name, optarg);
                 if (strlen(opts->hiding_name) > 0) hiding_flag = 1;
-
                 break;
             }
             case 'r': {

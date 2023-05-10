@@ -240,62 +240,22 @@ void interpret_result_image(struct options_image *opts) {
     }
 
 
-    /* decrypt bmp file header */
-    if (strstr(krypto_file_name, "bmp") != NULL) {
-        for (int i = 0; i < 54; i++) {
-            for (int j = 7; j >= 0; j--) {
-                if (counter == opts->result_pixel_data_size) {
-                    fseek(result, opts->result_padding, SEEK_CUR);
-                    counter = 0;
-                }
-                fread(&bits[j], sizeof(uint8_t), 1, result);
-                bits[j] = get_LSB((uint8_t) bits[j]);
-                byte = (uint8_t) ((byte << 1) | bits[j]);
-                counter++;
+    while (krypto_size_checker < krypto_size) {
+        for (int j = 7; j >= 0; j--) {
+            if (counter == opts->result_pixel_data_size) {
+                fseek(result, opts->result_padding, SEEK_CUR);
+                counter = 0;
             }
-            decrypt_byte = (uint8_t) encrypt_decrypt(byte);
-            fwrite(&decrypt_byte, sizeof(uint8_t), 1, kryptos);
+            fread(&bits[j], sizeof(uint8_t), 1, result);
+            bits[j] = get_LSB((uint8_t) bits[j]);
+            byte = (uint8_t) ((byte << 1) | bits[j]);
+            counter++;
         }
-
-
-        fseek(kryptos, 54, SEEK_SET);
-        while (krypto_size_checker < krypto_size - 54) {
-            for (int j = 7; j >= 0; j--) {
-                if (counter == opts->result_pixel_data_size) {
-                    fseek(result, opts->result_padding, SEEK_CUR);
-                    counter = 0;
-                }
-                fread(&bits[j], sizeof(uint8_t), 1, result);
-                bits[j] = get_LSB((uint8_t) bits[j]);
-                byte = (uint8_t) ((byte << 1) | bits[j]);
-                counter++;
-            }
-            krypto_size_checker++;
-            byte = (uint8_t) encrypt_decrypt(byte);
-            fwrite(&byte, sizeof(uint8_t), 1, kryptos);
-            memset(bits, 0, 8);
-        }
+        krypto_size_checker++;
+        byte = (uint8_t) encrypt_decrypt(byte);
+        fwrite(&byte, sizeof(uint8_t), 1, kryptos);
+        memset(bits, 0, 8);
     }
-
-    else {
-        while (krypto_size_checker < krypto_size) {
-            for (int j = 7; j >= 0; j--) {
-                if (counter == opts->result_pixel_data_size) {
-                    fseek(result, opts->result_padding, SEEK_CUR);
-                    counter = 0;
-                }
-                fread(&bits[j], sizeof(uint8_t), 1, result);
-                bits[j] = get_LSB((uint8_t) bits[j]);
-                byte = (uint8_t) ((byte << 1) | bits[j]);
-                counter++;
-            }
-            krypto_size_checker++;
-            byte = (uint8_t) encrypt_decrypt(byte);
-            fwrite(&byte, sizeof(uint8_t), 1, kryptos);
-            memset(bits, 0, 8);
-        }
-    }
-
 
     fseek(kryptos, 0, SEEK_END);
 
